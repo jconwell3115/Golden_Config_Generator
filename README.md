@@ -1,7 +1,7 @@
 ![Static Badge](https://img.shields.io/badge/Stage-Development-orange)
 [![Python Tested](https://img.shields.io/badge/Tested%20Python-%203.9%7C3.10%7C3.11%7C3.12-blue?logo=python&logoColor=green)](https://www.python.org/downloads/)
 [![GitHub License](https://img.shields.io/github/license/jconwell3115/Golden_Config_Generator?label=License)](https://github.com/jconwell3115/Golden_Config_Generator?tab=MIT-1-ov-file)
-![Jinja Version](https://img.shields.io/badge/Dependincy-Jinja2%3D%3D3.1.5-red?logo=jinja)
+[![Jinja Version](https://img.shields.io/badge/Dependincy-Jinja2%3D%3D3.1.5-red?logo=jinja)](https://pypi.org/project/Jinja2/)
 
 
 # Golden_Config_Generator
