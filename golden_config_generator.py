@@ -14,13 +14,14 @@ import fileinput
 import json
 import os
 import signal
+import sys
 import time
 import logging
 from datetime import datetime
 
 
 try:
-    """Try to import non-standard libraries, send a list of missing libraries if any aren't installed."""
+    # Try to import non-standard libraries, send a list of missing libraries if any aren't installed.
     from jinja2 import Environment, FileSystemLoader
     from termcolor import cprint
 
@@ -109,7 +110,6 @@ class ConfigGenerator:
 
     def read_old_config(self):
         """Reads the old configuration file and extracts unique information for use in the new configuration.
-
         =========
         Variables
         =========
@@ -139,24 +139,23 @@ class ConfigGenerator:
                                          '(Include the extension) '))
         self.old_config = os.path.join(self.project_path, r'Configurations\Old', self.old_config_file)
 
-        vlan_dict = {'vlans': {}}
+
         source_interface_dict = {'source_interface': ''}
         mtu_dict = {'mtu': ''}
         gateway_dict = {'gateway': ''}
         ecn_dict = {'chassis_id': input('What is the ECN of the replacement switch? ')}
-
-        # Turn into instance variable and remove dictionary names, append dictionaries to the list from each method
+        #TODO: turn into instance variable and remove dictionary names, append dictionaries to list from each method
         self.dict_list = [hostname_dict, vlan_dict, source_interface_dict, location_dict, ecn_dict]
         condition_dict_list = [self.site_dict, self.switch_type_dict]
 
         cprint('\nReading Old Configuration ...\n', 'blue', attrs=['bold'], force_color=True)
         time.sleep(.2)
         try:
-            with (open(self.old_config, 'r') as old_config):
+            with open(self.old_config, 'r') as old_config:
                 self.old_config = old_config.read()
         except FileNotFoundError:
             print('\n' + self.old_config, 'is not a valid file\nPlease check the filename and try again.\n')
-            exit()
+            sys.exit()
         except PermissionError:
             input('Please close the following file.\n\n' + self.old_config + '\n\nPress any key to try again.')
             self.read_old_config()
@@ -203,41 +202,33 @@ class ConfigGenerator:
                 self.switch_type_dict['$switch_type'] = 'router'
         self.dict_list.extend([hostname_dict, location_dict])
 
-                        # TODO: Split here for hostname and location and switch type
-                        # cprint('Getting the hostname ...\n', 'light_cyan', force_color=True)
-                        # time.sleep(.1)
-                        # hostname_list = line.split(' ')  # Create a new list split on blank spaces
-                        # hostname_dict['hostname'] = hostname_list[1].replace('\n', '').upper()
-                        # site_prefix = hostname_dict['hostname'][:2]  # Get the prefix from the hostname
-                        # if site_prefix.upper() in self.site_prefix_dict:
-                        #     cprint('Getting the site from the hostname ...\n', 'light_cyan', force_color=True)
-                        #     self.site_dict['$site'] = self.site_prefix_dict[site_prefix.upper()]  # Use prefix as site variable
-                        #     cprint('This switch will be configured for the ' + self.site_dict['$site'] + ' site!!\n',
-                        #            'red', attrs=['bold'], force_color=True)
-                        #     time.sleep(.1)
-                        # cprint('Setting the location from the hostname ...\n', 'light_cyan', force_color=True)
-                        # time.sleep(.1)
-                        # location_list = hostname_dict['hostname'].split('-')  # Split the hostname to get location
-                        # location_dict['building'] = location_list[2]  # Set building number from hostname
-                        # location_dict['room'] = location_list[3]  # Set room number from hostname
-                        # switch_type_prefix = location_list[1]
-                        # if switch_type_prefix.upper() in access_switch_prefix_list:  # Set switch type from the prefix
-                        #     self.switch_type_dict['$switch_type'] = 'access'
-                        # else:
-                        #     self.switch_type_dict['$switch_type'] = 'router'
-        #             # TODO: Split here for VLAN Method
-        #             elif line.startswith('spanning-tree vlan'):  # Get spanning-tree vlan priorities if they exist
-        #                 self.vlan_priority = line
-        #             elif line.startswith('vlan'):  # Get VLAN database information
-        #                 vlan_list = line.split(' ')
-        #                 vlan_id = vlan_list[1].replace('\n', '')
-        #                 vlan_dict['vlans'].setdefault(vlan_id, {})
-        #                 for vlan in old_config:
-        #                     if vlan.startswith(' name'):
-        #                         vlan_name_list = vlan.split(' ')
-        #                         vlan_dict['vlans'][vlan_id]['name'] = vlan_name_list[-1].replace('\n', '')
-        #                     elif vlan.startswith('!'):
-        #                         break
+    def get_vlan_info(self):
+        """
+
+        :return:
+        """
+        vlan_dict = {'vlans': {}}
+
+        for line in self.old_config.splitlines():
+            if line.startswith('spanning-tree vlan'):  # Get spanning-tree vlan priorities if they exist
+                self.vlan_priority = line
+            elif line.startswith('vlan'):  # Get VLAN database information
+                vlan_list = line.split(' ')
+                vlan_id = vlan_list[1].replace('\n', '')
+                vlan_dict['vlans'].setdefault(vlan_id, {})
+                for vlan in self.old_config.splitlines():
+                    if vlan.startswith(' name'):
+                        vlan_name_list = vlan.split(' ')
+                        vlan_dict['vlans'][vlan_id]['name'] = vlan_name_list[-1].replace('\n', '')
+                    elif vlan.startswith('!'):  # Return to outer loop when we hit the '!'
+                        break
+        self.dict_list.extend([vlan_dict])
+
+    def get_interface_info(self):
+        """
+
+        :return:
+        """
         #             # TODO: Split here for interface method
         #             elif line.startswith('interface'):  # Copy the interface configurations
         #                 interfaces = ''
