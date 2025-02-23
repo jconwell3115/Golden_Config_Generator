@@ -109,22 +109,18 @@ class ConfigGenerator:
         self.base_config_dict_list = []
 
     def read_old_config(self):
-        """Reads the old configuration file and extracts unique information for use in the new configuration.
+        """Reads the old configuration file and stores it in a variable used by other methods to extract information.
+
         =========
         Variables
         =========
-
-        ``:var dict site_dict:`` The site parameter used for conditions in site specific template selection\n
-        ``:var dict vlan_dict:`` The VLAN database\n
         ``:var dict source_interface_dict:`` The source interface for network services\n
-
         ``:var dict mtu_dict:`` The system MTU if it's configured in the old configuration\n
         ``:var dict gateway_dict:`` The default gateway if it's configured in the old configuration\n
         ``:var dict ecn_dict:`` Input from the user for the new switch ECN number\n
         ``:var lst dict_list:`` The list of all the dictionaries to use to update the ``self.parameters_dict`` for ease
         of rendering the jinja2 template\n
-        ``:var lst condition_dict_list:`` List of dictionary objects used to set the template conditions prior to
-        rendering\n
+
         :raise FileNotFoundError: If the filename is incorrect or file not being present in the correct folder.
         :except PermissionError: If the file is open
 
@@ -138,20 +134,17 @@ class ConfigGenerator:
         self.old_config_file = str(input('What is the filename of the old config file that you want to upgrade? '
                                          '(Include the extension) '))
         self.old_config = os.path.join(self.project_path, r'Configurations\Old', self.old_config_file)
-
-
         source_interface_dict = {'source_interface': ''}
         mtu_dict = {'mtu': ''}
         gateway_dict = {'gateway': ''}
         ecn_dict = {'chassis_id': input('What is the ECN of the replacement switch? ')}
         #TODO: turn into instance variable and remove dictionary names, append dictionaries to list from each method
         self.dict_list = [hostname_dict, vlan_dict, source_interface_dict, location_dict, ecn_dict]
-        condition_dict_list = [self.site_dict, self.switch_type_dict]
 
         cprint('\nReading Old Configuration ...\n', 'blue', attrs=['bold'], force_color=True)
         time.sleep(.2)
         try:
-            with open(self.old_config, 'r') as old_config:
+            with open(self.old_config, 'r', encoding='UTF-8') as old_config:
                 self.old_config = old_config.read()
         except FileNotFoundError:
             print('\n' + self.old_config, 'is not a valid file\nPlease check the filename and try again.\n')
@@ -170,7 +163,10 @@ class ConfigGenerator:
 
         ``:var dict hostname_dict:`` The hostname of the switch\n
         ``:var dict location_dict:`` The building and room number for SNMP lookup\n
-        ``:var lst access_switch_prefix_list:`` Prefixes used to determine if the switch is access layer
+        ``:var dict site_dict:`` The site parameter used for conditions in site specific template selection\n
+        ``:var lst access_switch_prefix_list:`` Prefixes used to determine if the switch is access layer\n
+        ``:var lst condition_dict_list:`` List of dictionary objects used to set the template conditions prior to
+        rendering\n
         :return:
         """
         cprint('Getting the hostname ...\n', 'light_cyan', force_color=True)
@@ -179,6 +175,8 @@ class ConfigGenerator:
         hostname_dict = {'hostname': ''}
         location_dict = {'building': '', 'room': ''}
         access_switch_prefix_list = ['AS', 'SE', 'EN']
+        condition_dict_list = [self.site_dict, self.switch_type_dict]
+
 
         for line in self.old_config.splitlines():
             hostname_list = line.split(' ')  # Create a new list split on blank spaces
@@ -201,10 +199,12 @@ class ConfigGenerator:
             else:
                 self.switch_type_dict['$switch_type'] = 'router'
         self.dict_list.extend([hostname_dict, location_dict])
+        for dictionary in condition_dict_list:  # Update the template_conditions dictionary
+            self.template_conditions.update(dictionary)
 
     def get_vlan_info(self):
         """
-
+        ``:var dict vlan_dict:`` The VLAN database\n
         :return:
         """
         vlan_dict = {'vlans': {}}
