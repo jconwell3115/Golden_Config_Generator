@@ -89,7 +89,7 @@ class ConfigGenerator:
         self.project_path = r'Place_Holder for now'
         self.template_path = os.path.join(self.project_path, r'Templates')
         self.old_config_file = ''
-        self.old_config = ''
+        self.old_config = []
         self.old_config_var = ''
         self.switch_template = os.path.join(self.template_path,  r'Switch_template.j2')
         self.new_config = os.path.join(self.project_path, r'Configurations\New')  # Set the path for new config
@@ -138,7 +138,7 @@ class ConfigGenerator:
         time.sleep(.2)
         try:
             with open(self.old_config, 'r', encoding='UTF-8') as old_config:
-                self.old_config = old_config.read()
+                self.old_config = old_config.readlines()
         except FileNotFoundError:
             print('\n' + self.old_config, 'is not a valid file\nPlease check the filename and try again.\n')
             sys.exit()
@@ -170,8 +170,7 @@ class ConfigGenerator:
         access_switch_prefix_list = ['AS', 'SE', 'EN']
         condition_dict_list = [self.site_dict, self.switch_type_dict]
 
-
-        for line in self.old_config.splitlines():
+        for line in self.old_config:
             hostname_list = line.split(' ')  # Create a new list split on blank spaces
             hostname_dict['hostname'] = hostname_list[1].replace('\n', '').upper()
             site_prefix = hostname_dict['hostname'][:2]  # Get the prefix from the hostname
@@ -205,14 +204,14 @@ class ConfigGenerator:
         """
         vlan_dict = {'vlans': {}}
 
-        for line in self.old_config.splitlines():
+        for line in self.old_config:
             if line.startswith('spanning-tree vlan'):  # Get spanning-tree vlan priorities if they exist
                 self.vlan_priority = line
             elif line.startswith('vlan'):  # Get VLAN database information
                 vlan_list = line.split(' ')
                 vlan_id = vlan_list[1].replace('\n', '')
                 vlan_dict['vlans'].setdefault(vlan_id, {})
-                for vlan in self.old_config.splitlines():
+                for vlan in self.old_config:
                     if vlan.startswith(' name'):
                         vlan_name_list = vlan.split(' ')
                         vlan_dict['vlans'][vlan_id]['name'] = vlan_name_list[-1].replace('\n', '')
@@ -225,11 +224,11 @@ class ConfigGenerator:
 
         :return:
         """
-        for line in self.old_config.splitlines():
+        for line in self.old_config:
             if line.startswith('interface'):  # Copy the interface configurations
                 interfaces = ''
                 interfaces += line  # First Line is the interface name
-                for interface in self.old_config.splitlines():
+                for interface in self.old_config:
                     if '!' in interface:  # Stop copying lines at the !
                         interfaces += '!\n'
                         break
@@ -247,10 +246,10 @@ class ConfigGenerator:
 
         :return:
         """
-        for line in self.old_config.splitlines():
+        for line in self.old_config:
             if line.startswith('router '):  # Copy all router instances as a block config
                 self.router_config += line
-                for router_config in self.old_config.splitlines():
+                for router_config in self.old_config:
                     if '!' in router_config:
                         self.router_config += '!'
                         break
@@ -270,7 +269,7 @@ class ConfigGenerator:
         source_interface_dict = {'source_interface': ''}
         mtu_dict = {'mtu': ''}
         gateway_dict = {'gateway': ''}
-        for line in self.old_config.splitlines():
+        for line in self.old_config:
 
             if line.startswith('logging'):  # Copy the logging information as a block config
                 if 'buffered' in line:  # Skip buffered logging config, this will be set by a new standard
