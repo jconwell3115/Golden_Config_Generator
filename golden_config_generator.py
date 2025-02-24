@@ -114,9 +114,7 @@ class ConfigGenerator:
         =========
         Variables
         =========
-        ``:var dict source_interface_dict:`` The source interface for network services\n
-        ``:var dict mtu_dict:`` The system MTU if it's configured in the old configuration\n
-        ``:var dict gateway_dict:`` The default gateway if it's configured in the old configuration\n
+        `
         ``:var lst dict_list:`` The list of all the dictionaries to use to update the ``self.parameters_dict`` for ease
         of rendering the jinja2 template\n
 
@@ -263,6 +261,9 @@ class ConfigGenerator:
 
     def get_network_services_info(self):
         """
+        `:var dict source_interface_dict:`` The source interface for network services\n
+        ``:var dict mtu_dict:`` The system MTU if it's configured in the old configuration\n
+        ``:var dict gateway_dict:`` The default gateway if it's configured in the old configuration\n
 
         :return:
         """
@@ -300,7 +301,7 @@ class ConfigGenerator:
 
     def read_templates_and_set_conditions(self):
         """This method reads the base jinja2 template into the variable ``data`` and modifies it to set the dictionary
-        conditions prior to the template rendering, as well as insert all the block configuration.
+        conditions prior to the template rendering, as well as insert all the copied block configuration.
 
         =========
         Variables
@@ -393,7 +394,8 @@ def main():
 
     :return: Parsed CLI arguments if there are any
     """
-
+    # TODO: add CLI arguments to take the file name or names if multiples are desired
+    # TODO: then remove the prompt to ask for file name
     signal.signal(signal.SIGINT, signal.SIG_DFL)  # KeyboardInterrupt: Ctrl-C
     # Create CLI arguments and descriptions
     parser = argparse.ArgumentParser(description='This program creates new configurations from old configuration files '
