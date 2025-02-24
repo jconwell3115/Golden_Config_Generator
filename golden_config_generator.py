@@ -117,7 +117,6 @@ class ConfigGenerator:
         ``:var dict source_interface_dict:`` The source interface for network services\n
         ``:var dict mtu_dict:`` The system MTU if it's configured in the old configuration\n
         ``:var dict gateway_dict:`` The default gateway if it's configured in the old configuration\n
-        ``:var dict ecn_dict:`` Input from the user for the new switch ECN number\n
         ``:var lst dict_list:`` The list of all the dictionaries to use to update the ``self.parameters_dict`` for ease
         of rendering the jinja2 template\n
 
@@ -134,12 +133,8 @@ class ConfigGenerator:
         self.old_config_file = str(input('What is the filename of the old config file that you want to upgrade? '
                                          '(Include the extension) '))
         self.old_config = os.path.join(self.project_path, r'Configurations\Old', self.old_config_file)
-        source_interface_dict = {'source_interface': ''}
-        mtu_dict = {'mtu': ''}
-        gateway_dict = {'gateway': ''}
-        ecn_dict = {'chassis_id': input('What is the ECN of the replacement switch? ')}
         #TODO: turn into instance variable and remove dictionary names, append dictionaries to list from each method
-        self.dict_list = [hostname_dict, vlan_dict, source_interface_dict, location_dict, ecn_dict]
+        self.dict_list = [hostname_dict, vlan_dict, source_interface_dict, location_dict]
 
         cprint('\nReading Old Configuration ...\n', 'blue', attrs=['bold'], force_color=True)
         time.sleep(.2)
@@ -201,6 +196,9 @@ class ConfigGenerator:
         self.dict_list.extend([hostname_dict, location_dict])
         for dictionary in condition_dict_list:  # Update the template_conditions dictionary
             self.template_conditions.update(dictionary)
+        self.new_config_template = hostname_dict['hostname'] + '.j2'  # Set the new template name from hostname
+        new_config_file = hostname_dict['hostname'] + '_' + self.current_date + '.cfg'
+        self.new_config = os.path.join(self.new_config, new_config_file)  # Set the new config file from hostname
 
     def get_vlan_info(self):
         """
@@ -230,7 +228,6 @@ class ConfigGenerator:
         :return:
         """
         for line in self.old_config.splitlines():
-            # TODO: Split here for interface method
             if line.startswith('interface'):  # Copy the interface configurations
                 interfaces = ''
                 interfaces += line  # First Line is the interface name
@@ -252,59 +249,54 @@ class ConfigGenerator:
 
         :return:
         """
+        for line in self.old_config.splitlines():
+            if line.startswith('router '):  # Copy all router instances as a block config
+                self.router_config += line
+                for router_config in self.old_config.splitlines():
+                    if '!' in router_config:
+                        self.router_config += '!'
+                        break
+                    else:
+                        self.router_config += router_config
+            elif line.startswith('ip route'):  # Copy all static routes as a block config
+                self.ip_route += line
 
-        #             # TODO: Split here for router configuration method
-        #             elif line.startswith('router '):  # Copy all router instances as a block config
-        #                 self.router_config += line
-        #                 for router_config in old_config:
-        #                     if '!' in router_config:
-        #                         self.router_config += '!'
-        #                         break
-        #                     else:
-        #                         self.router_config += router_config
-        #             elif line.startswith('ip route'):  # Copy all static routes as a block config
-        #                 self.ip_route += line
+    def get_network_services_info(self):
+        """
 
+        :return:
+        """
+        source_interface_dict = {'source_interface': ''}
+        mtu_dict = {'mtu': ''}
+        gateway_dict = {'gateway': ''}
+        for line in self.old_config.splitlines():
 
-        #             # TODO: Split here for remaining services method
-        #             elif line.startswith('logging'):  # Copy the logging information as a block config
-        #                 if 'buffered' in line:  # Skip buffered logging config, this will be set by a new standard
-        #                     continue
-        #                 else:
-        #                     self.logging += line
-        #
-        #             # Gather the source interface from the 'tacacs source-interface' command
-        #             elif line.startswith('ip tacacs source-interface'):
-        #                 source_list = line.split(' ')
-        #                 if source_list[-1] == '\n':
-        #                     del source_list[-1]
-        #                 source_interface_dict['source_interface'] = source_list[-1]
-        #             elif line.startswith('ip pim rp-address'):  # Copy the rp-address for pim
-        #                 self.rp_address += line
-        #             elif line.startswith('system mtu'):  # Copy the system MTU if it exists
-        #                 mtu_list = line.split(' ')
-        #                 mtu_dict['mtu'] = mtu_list[-1]
-        #                 dict_list.append(mtu_dict)
-        #             elif line.startswith('ip default-gateway'):  # Copy the default gateway if it exists
-        #                 default_list = line.split(' ')
-        #                 gateway_dict['gateway'] = default_list[-1]
-        #                 dict_list.append(gateway_dict)
-        #     for dictionary in dict_list:  # Update the parameters_dict with all the gathered dictionaries
-        #         self.parameters_dict.update(dictionary)
-        #     for dictionary in condition_dict_list:  # Update the template_conditions dictionary
-        #         self.template_conditions.update(dictionary)
-        #     self.new_config_template = hostname_dict['hostname'] + '.j2'  # Set the new template name from hostname
-        #     new_config_file = hostname_dict['hostname'] + '_' + self.current_date + '.cfg'
-        #     self.new_config = os.path.join(self.new_config, new_config_file)  # Set the new config file from hostname
-        #     # for key, value in self.parameters_dict.items():
-        #     #     print(f"{key}: {value}")
-        #
-        # except FileNotFoundError:
-        #     print('\n' + self.old_config, 'is not a valid file\nPlease check the filename and try again.\n')
-        #     exit()
-        # except PermissionError:
-        #     input('Please close the following file.\n\n' + self.old_config + '\n\nPress any key to try again.')
-        #     self.read_old_config()
+            if line.startswith('logging'):  # Copy the logging information as a block config
+                if 'buffered' in line:  # Skip buffered logging config, this will be set by a new standard
+                    continue
+                else:
+                    self.logging += line
+
+            # Gather the source interface from the 'tacacs source-interface' command
+            elif line.startswith('ip tacacs source-interface'):
+                source_list = line.split(' ')
+                if source_list[-1] == '\n':
+                    del source_list[-1]
+                source_interface_dict['source_interface'] = source_list[-1]
+            elif line.startswith('ip pim rp-address'):  # Copy the rp-address for pim
+                self.rp_address += line
+            elif line.startswith('system mtu'):  # Copy the system MTU if it exists
+                mtu_list = line.split(' ')
+                mtu_dict['mtu'] = mtu_list[-1]
+                self.dict_list.extend([mtu_dict])
+            elif line.startswith('ip default-gateway'):  # Copy the default gateway if it exists
+                default_list = line.split(' ')
+                gateway_dict['gateway'] = default_list[-1]
+                self.dict_list.extend([gateway_dict])
+        for dictionary in self.dict_list:  # Update the parameters_dict with all the gathered dictionaries
+            self.parameters_dict.update(dictionary)
+        # for key, value in self.parameters_dict.items():
+        #     print(f"{key}: {value}")
 
     def read_templates_and_set_conditions(self):
         """This method reads the base jinja2 template into the variable ``data`` and modifies it to set the dictionary
