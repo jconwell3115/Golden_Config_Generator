@@ -375,6 +375,10 @@ def sub_main(args):
     cfg = ConfigGenerator()
     cfg.read_old_config()
     cfg.get_switch_info()
+    cfg.get_vlan_info()
+    cfg.get_interface_info()
+    cfg.get_router_config()
+    cfg.get_network_services_info()
     cfg.read_templates_and_set_conditions()
     cfg.create_new_config()
 
