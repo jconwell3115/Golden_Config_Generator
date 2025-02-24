@@ -229,23 +229,30 @@ class ConfigGenerator:
 
         :return:
         """
-        #             # TODO: Split here for interface method
-        #             elif line.startswith('interface'):  # Copy the interface configurations
-        #                 interfaces = ''
-        #                 interfaces += line  # First Line is the interface name
-        #                 for interface in old_config:
-        #                     if '!' in interface:  # Stop copying lines at the !
-        #                         interfaces += '!\n'
-        #                         break
-        #                     else:
-        #                         interfaces += interface
-        #
-        #                 # Set the standard SVI configurations if they don't exist
-        #                 if 'interface Vlan' in interfaces and ' no ip proxy-arp' not in interfaces:
-        #                     interfaces = interfaces.replace('!\n', ' no ip proxy-arp\n no ip redirects\n!\n')
-        #                     # TODO: Add elif for access ports to add standard config and remove duplicates
-        #                     # TODO: Add elif for trunk interfaces to remove native vlans
-        #                 self.interfaces += interfaces
+        for line in self.old_config.splitlines():
+            # TODO: Split here for interface method
+            if line.startswith('interface'):  # Copy the interface configurations
+                interfaces = ''
+                interfaces += line  # First Line is the interface name
+                for interface in self.old_config.splitlines():
+                    if '!' in interface:  # Stop copying lines at the !
+                        interfaces += '!\n'
+                        break
+                    else:
+                        interfaces += interface
+
+                # Set the standard SVI configurations if they don't exist
+                if 'interface Vlan' in interfaces and ' no ip proxy-arp' not in interfaces:
+                    interfaces = interfaces.replace('!\n', ' no ip proxy-arp\n no ip redirects\n!\n')
+                    # TODO: Add elif for access ports to add standard config and remove duplicates
+                self.interfaces += interfaces
+
+    def get_router_config(self):
+        """
+
+        :return:
+        """
+
         #             # TODO: Split here for router configuration method
         #             elif line.startswith('router '):  # Copy all router instances as a block config
         #                 self.router_config += line
@@ -257,6 +264,8 @@ class ConfigGenerator:
         #                         self.router_config += router_config
         #             elif line.startswith('ip route'):  # Copy all static routes as a block config
         #                 self.ip_route += line
+
+
         #             # TODO: Split here for remaining services method
         #             elif line.startswith('logging'):  # Copy the logging information as a block config
         #                 if 'buffered' in line:  # Skip buffered logging config, this will be set by a new standard
