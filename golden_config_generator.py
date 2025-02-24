@@ -200,6 +200,10 @@ class ConfigGenerator:
 
     def get_vlan_info(self):
         """
+
+        =========
+        Variables
+        =========
         ``:var dict vlan_dict:`` The VLAN database\n
         :return:
         """
@@ -222,8 +226,15 @@ class ConfigGenerator:
 
     def get_interface_info(self):
         """
+        This method parses the old_config_list and extracts the physical and switched virtual interface
+        configuration. This is a simple copy and paste, breaking the copying at each '!'.  Future releases will
+        convert this into a parsers that returns a dictionary, used for testing and simpler modification.
 
-        :return:
+        =========
+        Variables
+        =========
+        ``:var str self.interfaces:`` String to store block configuration for all configured interfaces
+
         """
         for line in self.old_config_list:
             if line.startswith('interface'):  # Copy the interface configurations
@@ -244,6 +255,11 @@ class ConfigGenerator:
 
     def get_router_config(self):
         """
+        This method parses the old_config_list and extracts the router instance configurations along with any static
+        routes that may be configured.
+        =========
+        Variables
+        =========
 
         :return:
         """
@@ -261,6 +277,11 @@ class ConfigGenerator:
 
     def get_network_services_info(self):
         """
+        This method parses the old_config_list and extracts the configuration information for any network services.
+
+        =========
+        Variables
+        =========
         `:var dict source_interface_dict:`` The source interface for network services\n
         ``:var dict mtu_dict:`` The system MTU if it's configured in the old configuration\n
         ``:var dict gateway_dict:`` The default gateway if it's configured in the old configuration\n
