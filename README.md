@@ -20,5 +20,5 @@
 # TODO:
 - Add Jinja tempaltes for sites
 - Add base configuration template
-- Modularize the code into smaller methods
+- ~~Modularize the code into smaller methods~~
 - Add generic old configuration files for testing and proof of concept
