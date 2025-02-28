@@ -20,7 +20,11 @@
 
 ---
 # TODO:
-- Add Jinja tempaltes for sites
-- Add base configuration template
+- ~~Add Jinja tempaltes for sites~~
+- ~~Add base configuration template~~
 - ~~Modularize the code into smaller methods~~
 - Add generic old configuration files for testing and proof of concept
+- Add elif for access ports to add standard config and remove duplicates
+- CLI arguments to take the file name or names if multiples are desired
+- then remove the prompt to ask for file name
+- Add switch to read all files in directory
