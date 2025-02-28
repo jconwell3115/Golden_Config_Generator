@@ -6,7 +6,6 @@ __maintainer__ = "Jonathan Conwell"
 __email__ = "jconwell3115@gmail.com"
 __status__ = "Development"
 __docformat__ = 'reStructuredText'
-# TODO: Update Docstrings and test
 
 import argparse
 import csv
@@ -129,9 +128,6 @@ class ConfigGenerator:
         self.old_config_file = str(input('What is the filename of the old config file that you want to upgrade? '
                                          '(Include the extension) '))
         self.old_config = os.path.join(self.project_path, r'Configurations\Old', self.old_config_file)
-        #TODO: turn into instance variable and remove dictionary names, append dictionaries to list from each method
-        self.dict_list = [hostname_dict, vlan_dict, source_interface_dict, location_dict]
-
         cprint('\nReading Old Configuration ...\n', 'blue', attrs=['bold'], force_color=True)
         time.sleep(.2)
         try:
@@ -303,6 +299,7 @@ class ConfigGenerator:
                 if source_list[-1] == '\n':
                     del source_list[-1]
                 source_interface_dict['source_interface'] = source_list[-1]
+                self.dict_list.extend([source_interface_dict])
             elif line.startswith('ip pim rp-address'):  # Copy the rp-address for pim
                 self.rp_address += line
             elif line.startswith('system mtu'):  # Copy the system MTU if it exists
@@ -415,6 +412,7 @@ def main():
     """
     # TODO: add CLI arguments to take the file name or names if multiples are desired
     # TODO: then remove the prompt to ask for file name
+    # TODO: Add switch to read a directory
     signal.signal(signal.SIGINT, signal.SIG_DFL)  # KeyboardInterrupt: Ctrl-C
     # Create CLI arguments and descriptions
     parser = argparse.ArgumentParser(description='This program creates new configurations from old configuration files '
