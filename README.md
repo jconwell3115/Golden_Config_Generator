@@ -51,6 +51,8 @@ _Sample configurations files are located in the `configuration_files/old_configu
 ```
 _This will output the new configurations in the `configuration_files/new_configurations` directory._
 
+_There will be a template rendered with the hostname.j2 located in the `templates/new_switch_templates` directory_
+
 ---
 ## Directory Structure
 ```bash
