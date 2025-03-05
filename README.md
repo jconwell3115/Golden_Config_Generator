@@ -84,11 +84,11 @@ _This will output the new configurations in the `configuration_files/new_configu
 - Add switch to read all files in directory
 
 ## Author
-[Jonathan Conwell](https://github.com/jconwell3115)
-
-Email: `jconwell3115@gmail.com`
- 
-Phone: [867-5309](https://youtu.be/6WTdTwcmxyo?si=v07HrJN91Ezz9KMs)
+>[Jonathan Conwell](https://github.com/jconwell3115)
+>
+>Email: `jconwell3115@gmail.com`
+> 
+>Phone: [867-5309](https://youtu.be/6WTdTwcmxyo?si=v07HrJN91Ezz9KMs)
 
 #### DISCLAIMER
 
