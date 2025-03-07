@@ -34,7 +34,7 @@ This runs from the CLI using the config file names as arguments. You can use one
 
 **[Step 1] Clone repo:**
 ```bash
-git clone <repo_url>
+git clone git@github.com:jconwell3115/Golden_Config_Generator.git
 ```
 
 **[Step 2] Install required dependencies:**
