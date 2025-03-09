@@ -1,5 +1,4 @@
 djlint==1.36.4
-Jinja2==3.1.6
 mypy==1.15.0
 pipdeptree==2.25.0
 pre_commit==4.1.0

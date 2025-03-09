@@ -1,0 +1,16 @@
+[tool.ruff]
+line-length = 90
+exclude = ['cases_update']
+lint.extend-select = ['Q', 'RUF100', 'C90', 'UP', 'I']
+lint.mccabe = { max-complexity = 10 }
+lint.isort = { known-first-party = ['pytest_examples'] }
+target-version = 'py312'
+
+[tool.djlint]
+close_void_tags=true
+max_line_length=90
+preserve_blank_lines=true
+preserve_leading_space=true
+profile="jinja"
+use_gitignore=true
+include="J004,J018,T001,T002,T003,T027,T028,T032,T034"
