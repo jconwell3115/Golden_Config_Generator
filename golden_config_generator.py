@@ -1,4 +1,4 @@
-#!/usr/bin/python3.12
+#!/usr/bin/python3
 __author__ = "Jonathan Conwell"
 __date__ = "1/26/2025"
 __version__ = "2.0.0"

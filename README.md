@@ -12,37 +12,50 @@
 
 # Golden_Config_Generator
 > This program reads in the configuration file from a Cisco router or switch running IOS-XE extracts the unique 
-> information
-> and inserts it into a new configuration using a golden configuration template.
+> information and inserts it into a new configuration at designated locations. 
+> 
+> This new configuration is then rendered with a Jinja template with site specific configuration parameters and a 
+> golden configuration Jinja template that consists of best practice configurations standard across all site.
 
 ## Use Case
 This program was developed to meet the need to upgrade switch configurations during platform upgrades using the latest 
-industry best practices and enterprise security standards.
+industry best practices and enterprise security standards in an automated fashion.
 
 ---
 ## Features
 - Leverages Jinja templating in a single .j2 file per site with macros for config blocks like DNS, SNMP, etc.
-- Certain unique configurations are extracted as code blocks, such as interface configurations and routing configurations.
-   - These configurations are currently just pasted into the new configuration at set locations in the config.
-   - These configurations will need to be reviewed for relevance and application to the new platform.
+- Certain unique configurations are extracted as unstructured code blocks, such as interface configurations and routing 
+  configurations.
+   - These configurations are currently just pasted into the new configuration at set locations in the config 
+     designated by `!!![config_name]!!!`. 
+     - i.e `!!!Interfaces` is used to designate where the interface configuration goes.
+   - These copied configurations should be peer-reviewed for relevance and application to the new platform. 
+     Specifically interfaces names might change, VLANs might no longer be needed, etc.
    - **_Future releases will include parsers for these configurations for easier transfer to the new configuration_**
 
-## Usage
+## Installation
 
 This runs from the CLI using the config file names as arguments. You can use one or many names.
 > **_Future release will include the option to convert all configurations in a given directory._**
 
 **[Step 1] Clone repo:**
 ```bash
-git clone <repo_url>
+git clone git@github.com:jconwell3115/Golden_Config_Generator.git
 ```
 
-**[Step 2] Install required dependencies:**
+**[Step 2] Navigate to the project directory**
+```bash
+cd Golden_Config_Generator
+```
+
+**[Step 3] Install required dependencies:**
 ```bash
 pip install -r requirements.txt
 ```
 
-**[Step 3] Run the program on the test configurations for proof of concept:**
+## Usage
+
+**Run the program on the test configurations for proof of concept:**
 
 _Sample configurations files are located in the `configuration_files/old_configurations` directory._
 ```bash
@@ -82,7 +95,7 @@ _There will be a template rendered with the hostname.j2 located in the `template
 - ~~Add generic old configuration files for testing and proof of concept~~
 - Add elif for access ports to add standard config and remove duplicates
 - CLI arguments to take the file name or names if multiples are desired
-- then remove the prompt to ask for file name
+- Remove the prompt to ask for file name
 - Add switch to read all files in directory
 
 ## Author
