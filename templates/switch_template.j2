@@ -3,9 +3,9 @@
 {# Set the switch type based on the hostname of the switch in the old config #}
 {% set switch_type = "$switch_type" %}
 {% if switch_type == 'router' %}
-!Configured routing
-ip routing
-ip multicast-routing
+    !Configured routing
+    ip routing
+    ip multicast-routing
 {% endif %}
 !
 no wsma agent exec
@@ -51,11 +51,11 @@ device-sensor notify all-changes
 vtp mode off
 !
 archive
- log config
-  logging enable
-  logging size 1000
-  hidekeys
-  notify syslog
+log config
+logging enable
+logging size 1000
+hidekeys
+notify syslog
 !
 no platform punt-keepalive disable-kernel-core
 !
@@ -82,10 +82,10 @@ aaa accounting connection default start-stop group tacacs+
 aaa accounting system default start-stop group tacacs+
 aaa accounting update newinfo periodic 2880
 {% if switch_type == 'access' %}
-aaa authentication dot1x default group radius
-aaa authorization network default group radius
-aaa accounting dot1x default start-stop group radius
-aaa accounting identity default start-stop group radius
+    aaa authentication dot1x default group radius
+    aaa authorization network default group radius
+    aaa accounting dot1x default start-stop group radius
+    aaa accounting identity default start-stop group radius
 {% endif %}
 !
 !
@@ -106,10 +106,10 @@ ip domain name ndc.nasa.gov
 !
 !
 {% if switch_type == 'access' %}
-ip dhcp snooping vlan 1 4094
-no ip dhcp snooping information option
-no ip dhcp snooping verify mac-address
-ip dhcp snooping
+    ip dhcp snooping vlan 1 4094
+    no ip dhcp snooping information option
+    no ip dhcp snooping verify mac-address
+    ip dhcp snooping
 {% endif %}
 !
 login on-success log
@@ -138,9 +138,9 @@ device-tracking tracking
 dot1x system-auth-control
 {# Add system mtu if it's configured in the old config #}
 {% if mtu|length > 0 %}
-!!!! Configured system MTU from old configuration !!!!
-system mtu {{ mtu }}
-!
+    !!!! Configured system MTU from old configuration !!!!
+    system mtu {{ mtu }}
+    !
 {% endif %}
 !
 license boot level network-advantage addon dna-advantage
@@ -161,52 +161,52 @@ errdisable recovery interval 900
 {{ site.user() }}
 !
 redundancy
- mode sso
+mode sso
 !
 !
 !
 {% if switch_type == 'router' %}
-!!!! Configured Netflow for routers !!!!
-flow record SNA-FLOW_RECORD
-  description LAN IP NetFlow record format to send to SNA
-  match ipv4 tos
-  match ipv4 protocol
-  match ipv4 source address
-  match ipv4 destination address
-  match transport source-port
-  match transport destination-port
-  match interface input
-  collect transport tcp flags
-  collect interface output
-  collect counter bytes long
-  collect counter packets long
-  collect timestamp absolute first
-  collect timestamp absolute last
-!
-flow exporter NETFLOW_TO_SNA_FC
-  description Export LAN NetFlow to SNA FC
-  destination {{ site.flow_collector() }}
-  source {{ source_interface }}
-  transport udp 2055
-  template data timeout 10
-!
-flow monitor LAN_NETFLOW
-  record SNA-FLOW_RECORD
-  exporter NETFLOW_TO_SNA_FC
-  cache timeout active 60
-  cache timeout inactive 15
+    !!!! Configured Netflow for routers !!!!
+    flow record SNA-FLOW_RECORD
+    description LAN IP NetFlow record format to send to SNA
+    match ipv4 tos
+    match ipv4 protocol
+    match ipv4 source address
+    match ipv4 destination address
+    match transport source-port
+    match transport destination-port
+    match interface input
+    collect transport tcp flags
+    collect interface output
+    collect counter bytes long
+    collect counter packets long
+    collect timestamp absolute first
+    collect timestamp absolute last
+    !
+    flow exporter NETFLOW_TO_SNA_FC
+    description Export LAN NetFlow to SNA FC
+    destination {{ site.flow_collector() }}
+    source {{ source_interface }}
+    transport udp 2055
+    template data timeout 10
+    !
+    flow monitor LAN_NETFLOW
+    record SNA-FLOW_RECORD
+    exporter NETFLOW_TO_SNA_FC
+    cache timeout active 60
+    cache timeout inactive 15
 {% endif %}
 !
 !
 !
 transceiver type all
- monitoring
+monitoring
 {# Configure VLANs from the self.vlan_dict #}
 !Configured VLANs from old configuration
 {% for vlan in vlans %}
-vlan {{ vlan }}
-name {{ vlans[vlan].name }}
-!
+    vlan {{ vlan }}
+    name {{ vlans[vlan].name }}
+    !
 {% endfor %}
 !!!vlan_priority
 !
@@ -220,9 +220,9 @@ name {{ vlans[vlan].name }}
 !
 {# Configure Default Gateway if there is one #}
 {% if gateway|length > 0 %}
-!Configured default-gateway from old configuration
-ip default-gateway {{ gateway }}
-!
+    !Configured default-gateway from old configuration
+    ip default-gateway {{ gateway }}
+    !
 {% endif %}
 ip forward-protocol nd
 no ip forward-protocol udp tftp
@@ -263,9 +263,7 @@ logging source-interface {{ source_interface }}
 {# Configure logging parameters from old config #}
 !!!logging
 {# Configure multicast ACLs for routers. #}
-{% if switch_type == 'router' %}
-{{ site.multicast() }}
-{% endif %}
+{% if switch_type == 'router' %}{{ site.multicast() }}{% endif %}
 !
 !
 {# Configure site specific VTY ACLs #}
@@ -378,42 +376,42 @@ snmp-server chassis-id Tag:{{ chassis_id }}
 !
 !
 {% if switch_type == 'access' %}
-radius-server attribute 31 mac format ietf upper-case
-radius-server attribute 31 send nas-port-detail
-!
-radius-server dead-criteria time 30 tries 3
-radius-server deadtime 15
-!
-dot1x system-auth-control
-authentication mac-move permit
-!
-!
-{{ site.radius() }}
-!
-radius-server vsa send accounting
-radius-server vsa send authentication
-radius-server attribute 6 on-for-login-auth
-radius-server attribute 8 include-in-access-req
-radius-server attribute 25 access-request include
-radius-server vsa send accounting
-radius-server vsa send authentication
-radius-server attribute 31 mac format ietf upper-case
-radius-server attribute 31 send nas-port-detail
-radius-server dead-criteria time 30 tries 3
-radius-server deadtime 15
-radius-server key 7 133114535804213A24710A70071341140E
+    radius-server attribute 31 mac format ietf upper-case
+    radius-server attribute 31 send nas-port-detail
+    !
+    radius-server dead-criteria time 30 tries 3
+    radius-server deadtime 15
+    !
+    dot1x system-auth-control
+    authentication mac-move permit
+    !
+    !
+    {{ site.radius() }}
+    !
+    radius-server vsa send accounting
+    radius-server vsa send authentication
+    radius-server attribute 6 on-for-login-auth
+    radius-server attribute 8 include-in-access-req
+    radius-server attribute 25 access-request include
+    radius-server vsa send accounting
+    radius-server vsa send authentication
+    radius-server attribute 31 mac format ietf upper-case
+    radius-server attribute 31 send nas-port-detail
+    radius-server dead-criteria time 30 tries 3
+    radius-server deadtime 15
+    radius-server key 7 133114535804213A24710A70071341140E
 {% endif %}
 !
 ipv6 access-list VTY_ACCESS_IPv6
- sequence 10 remark deny all
- sequence 20 deny ipv6 any any log
+sequence 10 remark deny all
+sequence 20 deny ipv6 any any log
 !
 ipv6 access-list SNMP_ACCESS_IPv6
- sequence 10 remark deny all
- sequence 20 deny ipv6 any any log
+sequence 10 remark deny all
+sequence 20 deny ipv6 any any log
 !
 control-plane
- service-policy input system-cpp-policy
+service-policy input system-cpp-policy
 !
 banner login ^C
 ***************************************************************
@@ -436,25 +434,25 @@ banner login ^C
 ^C
 !
 line con 0
- session-timeout 10
- exec-timeout 15 0
- transport output none
- stopbits 1
+session-timeout 10
+exec-timeout 15 0
+transport output none
+stopbits 1
 line vty 0 4
- session-timeout 10
- access-class VTY_ACCESS in
- exec-timeout 15 0
- ipv6 access-class VTY_ACCESS_IPv6 in
- length 0
- transport input ssh
- transport output ssh
+session-timeout 10
+access-class VTY_ACCESS in
+exec-timeout 15 0
+ipv6 access-class VTY_ACCESS_IPv6 in
+length 0
+transport input ssh
+transport output ssh
 line vty 5 97
- session-timeout 10
- access-class VTY_ACCESS in
- exec-timeout 15 0
- ipv6 access-class VTY_ACCESS_IPv6 in
- transport input none
- transport output none
+session-timeout 10
+access-class VTY_ACCESS in
+exec-timeout 15 0
+ipv6 access-class VTY_ACCESS_IPv6 in
+transport input none
+transport output none
 !
 ntp allow mode control 3
 !
