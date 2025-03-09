@@ -1,0 +1,78 @@
+---
+repos:
+  # Ansible Lint
+  - repo: https://github.com/ansible/ansible-lint
+    rev: v24.12.2 # Use the latest version of ansible-lint
+    hooks:
+      - id: ansible-lint
+        name: Ansible Lint
+        description: Lint Ansible playbooks, roles, and tasks for best practices
+        stages: [manual, pre-commit]
+        args: ["--fix", "-c", ".ansible-lint"]
+        log_file: logs/ansible-lint.log
+        types: [yaml]
+
+  # Yamllint
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: [-c=/home/jconw483/my_work_tools/global_venv/.yamllint]
+        name: yamllint
+        description: Lint YAML files for best practices
+        stages: [manual, pre-commit]
+        log_file: logs/yamllint.log
+        types: [yaml]
+
+  # Actionlint (GitHub Actions Linter)
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.7
+    hooks:
+      - id: actionlint
+        name: Actionlint
+        description: Lint GitHub Actions workflows for best practices
+        files: "^.github/$"
+        args: ["-ignore", "github.event.comment.body", "-ignore", "action is too old"] # Temporary
+        stages: [manual, pre-commit]
+        log_file: logs/actionlint.log
+        types: [yaml]
+
+  # Ruff (Python Linter)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.1 # Use the latest version of Ruff pre-commit
+    hooks:
+      - id: ruff
+        name: Ruff Linter
+        entry: ruff check
+        args: ["--fix"]
+        description: Fast Python linter and formatter
+        stages: [manual]
+        log_file: logs/ruff.log
+        types: [python]
+      - id: ruff-format
+        name: Ruff Formatter
+        entry: ruff format
+        description: Fast Python linter and formatter
+        stages: [manual, pre-commit]
+        log_file: logs/ruff.log
+        types: [python]
+
+  # TruffleHog (Secrets Detection)
+  - repo: https://github.com/trufflesecurity/trufflehog
+    rev: v3.88.2 # Use the latest version of TruffleHog
+    hooks:
+      - id: trufflehog
+        name: TruffleHog
+        description: Scan for secrets in files before committing
+        entry: trufflehog filesystem ./ --json
+        always_run: true
+        files: .*
+        stages: [manual, pre-commit]
+        log_file: logs/trufflehog.log
+
+  # djlinter for Jinja2 templates
+  - repo: https://github.com/djlint/djLint
+    rev: v1.36.4
+    hooks:
+      - id: djlint-reformat-jinja
+      - id: djlint-jinja
