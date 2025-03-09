@@ -3,4 +3,3 @@ pre-commit
 termcolor
 trufflehog
 yamllint
-
