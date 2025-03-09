@@ -1,41 +1,42 @@
 ---
 repos:
-  # Ansible Lint
-  - repo: https://github.com/ansible/ansible-lint
-    rev: v24.12.2 # Use the latest version of ansible-lint
-    hooks:
-      - id: ansible-lint
-        name: Ansible Lint
-        description: Lint Ansible playbooks, roles, and tasks for best practices
-        stages: [manual, pre-commit]
-        args: ["--fix", "-c", ".ansible-lint"]
-        log_file: logs/ansible-lint.log
-        types: [yaml]
+  # Ansible Lint - Commented out for now, might add Ansible later
+#  - repo: https://github.com/ansible/ansible-lint
+#    rev: v24.12.2 # Use the latest version of ansible-lint
+#    hooks:
+#      - id: ansible-lint
+#        name: Ansible Lint
+#        description: Lint Ansible playbooks, roles, and tasks for best practices
+#        stages: [manual, pre-commit]
+#        args: ["--fix", "-c", ".ansible-lint"]
+#        log_file: logs/ansible-lint.log
+#        types: [yaml]
 
   # Yamllint
   - repo: https://github.com/adrienverge/yamllint.git
     rev: v1.35.1
     hooks:
       - id: yamllint
-        args: [-c=/home/jconw483/my_work_tools/global_venv/.yamllint]
+        args: [-c=/home/jconw483/my_work_tools/environment_setup/.yamllint]
         name: yamllint
         description: Lint YAML files for best practices
         stages: [manual, pre-commit]
         log_file: logs/yamllint.log
         types: [yaml]
 
-  # Actionlint (GitHub Actions Linter)
-  - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.7
-    hooks:
-      - id: actionlint
-        name: Actionlint
-        description: Lint GitHub Actions workflows for best practices
-        files: "^.github/$"
-        args: ["-ignore", "github.event.comment.body", "-ignore", "action is too old"] # Temporary
-        stages: [manual, pre-commit]
-        log_file: logs/actionlint.log
-        types: [yaml]
+# Commented out for now, might add actions later for CI/CD with AAP
+#  # Actionlint (GitHub Actions Linter)
+#  - repo: https://github.com/rhysd/actionlint
+#    rev: v1.7.7
+#    hooks:
+#      - id: actionlint
+#        name: Actionlint
+#        description: Lint GitHub Actions workflows for best practices
+#        files: "^.github/$"
+#        args: ["-ignore", "github.event.comment.body", "-ignore", "action is too old"] # Temporary
+#        stages: [manual, pre-commit]
+#        log_file: logs/actionlint.log
+#        types: [yaml]
 
   # Ruff (Python Linter)
   - repo: https://github.com/astral-sh/ruff-pre-commit
