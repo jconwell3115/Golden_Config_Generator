@@ -8,8 +8,10 @@
 [![Jinja Version](https://img.shields.io/badge/Dependancy-Jinja2-red?logo=jinja)](https://pypi.org/project/Jinja2/)
 
 ![Ruff Linter](https://img.shields.io/badge/Linters-Ruff-Green?logo=ruff&logoSize=auto)
-![Static Badge](https://img.shields.io/badge/Linters-yamllint-Green?logo=yaml&logoSize=auto)
-![Static Badge](https://img.shields.io/badge/Linters-djlint-Green?logo=jinja&logoSize=auto)
+![YAMLLINT](https://img.shields.io/badge/Linters-yamllint-Green?logo=yaml&logoSize=auto)
+![DJLint](https://img.shields.io/badge/Linters-DJLint-Green?logo=jinja&logoSize=auto)
+![TrufflHog](https://img.shields.io/badge/Linters-Trufflehog-Green?logo=grunt&logoColor=white&logoSize=auto)
+
 
 
 
