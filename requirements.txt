@@ -1,13 +1,2 @@
-astroid==3.3.8
-dill==0.3.9
-isort==6.0.0
-Jinja2==3.1.5
-MarkupSafe==3.0.2
-mccabe==0.7.0
-mypy==1.15.0
-mypy-extensions==1.0.0
-platformdirs==4.3.6
-pylint==3.3.4
-termcolor==2.5.0
-tomlkit==0.13.2
-typing_extensions==4.12.2
+jinja2
+termcolor
