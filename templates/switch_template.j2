@@ -1,7 +1,7 @@
 {# Import Macro file with site specific variables #}
 {% import '$site.j2' as site %}
 {# Set the switch type based on the hostname of the switch in the old config #}
-{% set switch_type = '$switch_type' %}
+{% set switch_type = "$switch_type" %}
 {% if switch_type == 'router' %}
 !Configured routing
 ip routing
