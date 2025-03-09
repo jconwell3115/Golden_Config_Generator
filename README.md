@@ -88,6 +88,22 @@ _There will be a template rendered with the hostname.j2 located in the `template
     └── switch_template.j2
 ```
 ---
+
+## Possible Automation Enhancements
+> This is a general idea and the details would need to be defined a bit more
+- Create Ansible Playbook that orchestrates the following
+  
+  1. Login to a live network device and gather the configuration.
+  2. Save the file locally and to the flash on the network device.
+  3. Copy the configuration to flash:[hostname]_automated_reconfigure.cfg.
+  4. Run the configuration through the golden_config_generator.py program to generate a new configuration.
+  5. Copy the new configuration to the live network device
+  6. Create an eem script that will copy the new configuration into startup and reload the device.
+     - **The EEM script needs to be in the new configuration as well.**
+  7. The EEM script will run checkouts after the reboot to ensure everything is working fine, else it will revert the 
+     configuration to the old config and reload again.
+
+---
 ## TODO:
 - ~~Add Jinja tempaltes for sites~~
 - ~~Add base configuration template~~
