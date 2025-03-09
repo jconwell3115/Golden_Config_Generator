@@ -23,7 +23,7 @@ industry best practices and enterprise security standards in an automated fashio
 
 ---
 ## Features
-- Leverages Jinja templating in a single .j2 file per site with macros for config blocks like DNS, SNMP, etc.
+- Leverages Jinja templating in a .j2 template per site with macros for config blocks like DNS, SNMP, etc.
 - Certain unique configurations are extracted as unstructured code blocks, such as interface configurations and routing 
   configurations.
    - These configurations are currently just pasted into the new configuration at set locations in the config 
