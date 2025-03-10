@@ -1,51 +1,96 @@
 {% macro vty() %}
     !!!! Begin site specific VTY ACL configuration !!!!
     !
+    ip access-list extended 22
+    remark SSH-SCP Access
+    permit	ip	host 10.10.22.20	any
+    permit	ip	host 10.10.22.21	any
+    permit	ip	host	10.10.22.22	any
+    permit	ip	host	10.10.22.23	any
     !
     !!!! End site specific VTY ACL configuration !!!!
 {% endmacro %}
 
 {% macro snmp() %}
     !!!! Begin site specific SNMP configuration !!!!
+    {# ACLs, users, groups and hosts #}
     !
-    testing
+    ip access-list standard 161
+    10 remark Allow SNMP management traffic
+    10	permit	10.10.161.20
+    20	permit	10.10.161.21
+    30	permit	10.10.161.22
+    40	permit	10.10.161.23
+    !
+    snmp-server group SNMP_MGMT v3 priv access 161
+    !
+    snmp-server host 10.10.161.20 version 3 priv SNMP_MGMT
+    snmp-server host 10.10.161.21 version 3 priv SNMP_MGMT
+    snmp-server host 10.10.161.22 version 3 priv SNMP_MGMT
+    snmp-server host 10.10.161.23 version 3 priv SNMP_MGMT
+    !
+    snmp-server user roadhouse SNMP_MGMT v3 auth sha $NMP$h4PW priv AES 128 $NMP3nT3rpri$3
     !
     !!!! End site specific SNMP configuration !!!!
 {% endmacro %}
 
 {% macro multicast() %}
     !!!! Begin site specific multicast configuration !!!!
+    {# rp-address statements#}
+    !
+    ip pim rp-address 10.10.240.2 10 override
     !
     !End site specific multicast configuration
 {% endmacro %}
 
 {% macro ntp() %}
     !!!! Begin site specific NTP configuration !!!!
+    {# NTP ACL & Peer group #}
     !
+    ip access-list standard NTP_ACCESS
+    10 permit 10.10.123.20
+    20 permit 10.10.123.21
+    30 permit 10.10.123.22
+    !
+    ntp access-group peer NTP_ACCESS
+    ntp server 10.10.123.20
+    ntp server 10.10.123.21
+    ntp server 10.10.123.22
     !
     !!!! End site specific NTP configuration !!!!
 {% endmacro %}
 
 {% macro radius() %}
     !!!! Begin site specific radius configuration !!!!
+    {# Tertiary RADIUS server & dynamic author statement #}
     !
+    radius server ise-radius3_site1-psn_VIP
+    address ipv4 10.10.181.20 auth-port 1812 acct-port 1813
+    key 7 02121D4B0E150A3749400F16171B1B0D09
     !
     !!!! End site specific radius configuration !!!!
 {% endmacro %}
 
 {% macro dns() %}
     !!!! Configure site specific name server !!!!
+    {# name-server statement #}
     !
+    ip name-server 8.8.8.8 8.8.4.4
+    ip domain name roadhouse.com
     !
 {% endmacro %}
 
 {% macro user() %}
     !!!! Configure site specific username and/or enable secret !!!!
+    {# local user and enable secret #}
+    username roadhouse privilege 15 secret 7 02121D4B0E150A3749400F16171B1B0D09
     !
+    enable secret 7 02121D4B0E150A3749400F16171B1B0D09
     !
+    !!!! End site username and/or enable secret configuration !!!!
 {% endmacro %}
 
 {% macro flow_collector() %}
-    !
-    !
+    {# Site specific flow collector IP address #}
+    10.10.205.2
 {% endmacro %}
