@@ -65,6 +65,11 @@ cd Golden_Config_Generator
 pip install -r requirements.txt
 ```
 
+**[Step 4] Install [pre-commit](https://pre-commit.com/index.html#intro):**
+```bash
+pre-commit install
+```
+
 ## Usage
 
 **Run the program on the test configurations for proof of concept:**
@@ -124,7 +129,7 @@ _There will be a template rendered with the hostname.j2 located in the `template
 - Add elif for access ports to add standard config and remove duplicates
 - CLI arguments to take the file name or names if multiples are desired
 - Remove the prompt to ask for file name
-- Add switch to read all files in directory
+- Add a CLI switch to read and convert all files in a given directory
 
 ## Author
 >[Jonathan Conwell](https://github.com/jconwell3115)
