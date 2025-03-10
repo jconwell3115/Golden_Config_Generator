@@ -3,10 +3,10 @@
     !
     ip access-list extended 22
     remark SSH-SCP Access
-    permit	ip	host 10.10.22.10	any
-    permit	ip	host 10.10.22.11	any
-    permit	ip	host	10.10.22.12	any
-    permit	ip	host	10.10.22.13	any
+    permit ip host 10.10.22.10 any
+    permit ip host 10.10.22.11 any
+    permit ip host 10.10.22.12 any
+    permit ip host 10.10.22.13	any
     !
     !!!! End site specific VTY ACL configuration !!!!
 {% endmacro %}
@@ -16,10 +16,10 @@
     !
     ip access-list standard 161
     10 remark Allow SNMP management traffic
-    10	permit	10.10.161.10
-    20	permit	10.10.161.11
-    30	permit	10.10.161.12
-    40	permit	10.10.161.13
+    10 permit 10.10.161.10
+    20 permit 10.10.161.11
+    30 permit 10.10.161.12
+    40 permit 10.10.161.13
     !
     snmp-server group SNMP_MGMT v3 priv access 161
     !
