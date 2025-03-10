@@ -7,10 +7,12 @@
 
 [![Jinja Version](https://img.shields.io/badge/Dependancy-Jinja2-red?logo=jinja)](https://pypi.org/project/Jinja2/)
 
-![Ruff Linter](https://img.shields.io/badge/Linters-Ruff-Green?logo=ruff&logoSize=auto)
-![YAMLLINT](https://img.shields.io/badge/Linters-yamllint-Green?logo=yaml&logoSize=auto)
-![DJLint](https://img.shields.io/badge/Linters-DJLint-Green?logo=jinja&logoSize=auto)
-![TrufflHog](https://img.shields.io/badge/Linters-Trufflehog-Green?logo=grunt&logoColor=white&logoSize=auto)
+![Pre-Commit](https://img.shields.io/badge/Pre--Commit%20Linters-black?style=for-the-badge&logo=pre-commit&logoSize=auto)
+
+![Ruff Linter](https://img.shields.io/badge/Ruff-Green?logo=ruff&logoSize=auto)
+![YAMLLINT](https://img.shields.io/badge/yamllint-Green?logo=yaml&logoSize=auto)
+![DJLint](https://img.shields.io/badge/DJLint-Green?logo=jinja&logoSize=auto)
+![TrufflHog](https://img.shields.io/badge/Trufflehog-Green?logo=grunt&logoColor=white&logoSize=auto)
 
 
 
