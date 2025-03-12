@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.12
 __author__ = "Jonathan Conwell"
 __date__ = "1/26/2025"
 __version__ = "2.0.0"
@@ -115,32 +115,31 @@ class ConfigGenerator:
         self.dict_list = []
         self.base_config_dict_list = []
 
-    def read_old_config(self):
+    def read_old_config(self, config: str):
         """Reads the old configuration file and stores it in a variable used by other methods to extract information.
 
+        Parameters
         =========
+        :parameter config: str Name of the old configuration file
+
+
         Variables
         =========
+        :var list self.old_config_list: List of lines from the old configuration file
 
 
-        :raise FileNotFoundError: If the filename is incorrect or file not being present in the correct folder.
-        :except PermissionError: If the file is open
-        :return: self.old_config
-        :returns: **[dict, list, str]** Several different data stores with dictionaries, lists and strings of configuration
-        extracted from the old switch configuration
-        :rtype: dict
-        :rtype: lst
-        :rtype: str
+        :exception FileNotFoundError: If the filename is incorrect or file not being present in the correct folder.
+        :exception PermissionError: If the file is open or unreadable
 
         """
-        self.old_config_file = str(
-            input(
-                "What is the filename of the old config file that you want to upgrade? "
-                "(Include the extension) "
-            )
-        )
+        if config.endswith(".cfg"):
+            cprint(config + " file submitted ...", "light_green", force_color=True)
+
+        self.old_config_file = config
         self.old_config = os.path.join(
-            self.project_path, r"Configurations\Old", self.old_config_file
+            self.project_path,
+            r"configuration_files\old_configurations",
+            self.old_config_file,
         )
         cprint(
             "\nReading Old Configuration ...\n", "blue", attrs=["bold"], force_color=True
@@ -150,9 +149,13 @@ class ConfigGenerator:
             with open(self.old_config, "r", encoding="UTF-8") as old_config:
                 self.old_config_list = old_config.readlines()
         except FileNotFoundError:
-            print(
-                "\n" + self.old_config,
-                "is not a valid file\nPlease check the filename and try again.\n",
+            cprint(
+                "A file named "
+                + self.old_config_file
+                + " was not found!!\nPlease check the filename and try again.\n",
+                color="red",
+                attrs=["bold"],
+                force_color=True,
             )
             sys.exit()
         except PermissionError:
@@ -161,7 +164,7 @@ class ConfigGenerator:
                 + self.old_config
                 + "\n\nPress any key to try again."
             )
-            self.read_old_config()
+            self.read_old_config(config=config)
 
     def get_switch_info(self):
         """
@@ -475,9 +478,16 @@ def sub_main(args):
     :param args: Parsed CLI arguments
     :return: None
     """
-
     cfg = ConfigGenerator()
-    cfg.read_old_config()
+    # Check for CLI arguments, send the list as a parameter else ask for the file name
+    if args.config:
+        cfg.read_old_config(config=args.config)
+    else:
+        config = input(
+            "What is the filename of the old config file that you want to upgrade? "
+            "(Include the .cfg extension) "
+        )
+        cfg.read_old_config(config=config)
     cfg.get_switch_info()
     cfg.get_vlan_info()
     cfg.get_interface_info()
@@ -497,15 +507,19 @@ def main():
 
     :return: Parsed CLI arguments if there are any
     """
-    # TODO: add CLI arguments to take the file name or names if multiples are desired
-    # TODO: then remove the prompt to ask for file name
-    # TODO: Add switch to read a directory
+    # TODO: add CLI arguments to take the file name
     signal.signal(signal.SIGINT, signal.SIG_DFL)  # KeyboardInterrupt: Ctrl-C
     # Create CLI arguments and descriptions
     parser = argparse.ArgumentParser(
-        description="This program creates new configurations from old configuration files "
-        "for Cisco switches"
+        prog="golden_config_generator",
+        description="This program creates new 'golden' configurations using industry standard best practices from old "
+        "configuration files for Cisco switches running IOS-XE versions 16.9 and up.",
+        epilog="Thanks for using %(prog)s!",
     )
+    parser.add_argument(
+        "-c", "--config", required=False, help="Configuration file to convert"
+    )
+
     args = parser.parse_args()
     sub_main(args)
 
