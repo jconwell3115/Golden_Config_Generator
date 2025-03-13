@@ -69,8 +69,6 @@ class ConfigGenerator:
     :var str self.current_date: Date for use in output file naming
     :var str self.project_path: File path to the project
     :var str self.template_path: File path to the templates for the project
-    :var str self.old_config_file: Input from user, is the file name of the old configuration file
-    :var str self.old_config: Full file path and file name of the old configuration file
     :var str self.new_config:  File path to store the new configuration file later
     :var str self.new_config_template: Empty string, will be used to store the new config template created later
     :var dict self.parameters_dict: Dictionary that will be used to compile the dictionaries generated from the
@@ -91,15 +89,14 @@ class ConfigGenerator:
         """ """
 
         self.current_date = datetime.now().strftime("%Y_%m_%d")
-        self.project_path = r"Place_Holder for now"
+        # Change this to the path for your project
+        self.project_path = "/home/jconw483/Work_Environments/GoldenConfigGenerator/Golden_Config_Generator/"
         self.template_path = os.path.join(self.project_path, r"Templates")
-        self.old_config_file = ""
-        self.old_config = ""
         self.old_config_list = []
         self.switch_template = os.path.join(self.template_path, r"Switch_template.j2")
         self.new_config = os.path.join(
-            self.project_path, r"Configurations\New"
-        )  # Set the path for new config
+            self.project_path, r"configuration_files/new_configurations"
+        )  # new config path
         self.new_config_template = ""
         self.parameters_dict = {}
         self.template_conditions = {}
@@ -115,18 +112,11 @@ class ConfigGenerator:
         self.dict_list = []
         self.base_config_dict_list = []
 
-    def read_old_config(self, config: str):
-        """Reads the old configuration file and stores it in a variable used by other methods to extract information.
+    def read_old_config(self, config: str) -> None:
+        """
+        Reads the old configuration file and stores it in a variable used by other methods to extract information.
 
-        Parameters
-        =========
-        :parameter config: str Name of the old configuration file
-
-
-        Variables
-        =========
-        :var list self.old_config_list: List of lines from the old configuration file
-
+        :parameter config: File name to the old configuration file
 
         :exception FileNotFoundError: If the filename is incorrect or file not being present in the correct folder.
         :exception PermissionError: If the file is open or unreadable
@@ -134,24 +124,31 @@ class ConfigGenerator:
         """
         if config.endswith(".cfg"):
             cprint(config + " file submitted ...", "light_green", force_color=True)
+        else:
+            config = config + ".cfg"
 
-        self.old_config_file = config
-        self.old_config = os.path.join(
+        print(config)
+
+        old_config_file = config
+        old_config_path = os.path.join(
             self.project_path,
-            r"configuration_files\old_configurations",
-            self.old_config_file,
+            r"configuration_files/old_configurations",
+            old_config_file,
         )
         cprint(
-            "\nReading Old Configuration ...\n", "blue", attrs=["bold"], force_color=True
+            "\nReading in Old Configuration ...\n",
+            "blue",
+            attrs=["bold"],
+            force_color=True,
         )
         time.sleep(0.2)
         try:
-            with open(self.old_config, "r", encoding="UTF-8") as old_config:
+            with open(old_config_path, "r", encoding="UTF-8") as old_config:
                 self.old_config_list = old_config.readlines()
         except FileNotFoundError:
             cprint(
                 "A file named "
-                + self.old_config_file
+                + old_config_file
                 + " was not found!!\nPlease check the filename and try again.\n",
                 color="red",
                 attrs=["bold"],
@@ -161,30 +158,23 @@ class ConfigGenerator:
         except PermissionError:
             input(
                 "Please close the following file.\n\n"
-                + self.old_config
+                + old_config_path
                 + "\n\nPress any key to try again."
             )
             self.read_old_config(config=config)
 
     def get_switch_info(self):
         """
+
         This method parses the old_config_var and extracts the hostname, from the hostname it gathers the site name
         used to set the Jinja parameters per site later.  It also extracts the location for the building and room.
         These all assume a certain naming convention for the network device, site-switch_type-building-room-instance#.
 
         Example: S1-EN-3320-104-1
 
-        =========
-        Variables
-        =========
-        ``:var dict hostname_dict:`` The hostname of the switch\n
-        ``:var dict location_dict:`` The building and room number for SNMP lookup\n
-        ``:var dict site_dict:`` The site parameter used for conditions in site specific template selection\n
-        ``:var lst access_switch_prefix_list:`` Prefixes used to determine if the switch is access layer\n
-        ``:var lst condition_dict_list:`` List of dictionary objects used to set the template conditions prior to
-        rendering\n
-        :return:
         """
+        site_prefix_dict = {"S1": "site_1", "S2": "site_2", "S3": "Site_3"}
+
         cprint("Getting the hostname ...\n", "light_cyan", force_color=True)
         time.sleep(0.1)
 
@@ -194,47 +184,48 @@ class ConfigGenerator:
         condition_dict_list = [self.site_dict, self.switch_type_dict]
 
         for line in self.old_config_list:
-            hostname_list = line.split(" ")  # Create a new list split on blank spaces
-            hostname_dict["hostname"] = hostname_list[1].replace("\n", "").upper()
-            site_prefix = hostname_dict["hostname"][
-                :2
-            ]  # Get the prefix from the hostname
-            if site_prefix.upper() in self.site_prefix_dict:
+            if line.startswith("hostname"):
+                hostname_list = line.split(" ")  # Create a new list split on blank spaces
+                hostname_dict["hostname"] = hostname_list[1].replace("\n", "").upper()
+                site_prefix = hostname_dict["hostname"][
+                    :2
+                ]  # Get the prefix from the hostname
+                if site_prefix.upper() in site_prefix_dict:
+                    cprint(
+                        "Getting the site from the hostname ...\n",
+                        "light_cyan",
+                        force_color=True,
+                    )
+                    self.site_dict["$site"] = site_prefix_dict[
+                        site_prefix.upper()
+                    ]  # Use prefix as site variable
+                    cprint(
+                        f"This switch will be configured for the {self.site_dict['$site']} site!!\n",
+                        "red",
+                        attrs=["bold"],
+                        force_color=True,
+                    )
+                    time.sleep(0.1)
                 cprint(
-                    "Getting the site from the hostname ...\n",
+                    "Setting the location from the hostname ...\n",
                     "light_cyan",
                     force_color=True,
                 )
-                self.site_dict["$site"] = self.site_prefix_dict[
-                    site_prefix.upper()
-                ]  # Use prefix as site variable
-                cprint(
-                    f"This switch will be configured for the {self.site_dict['$site']} site!!\n",
-                    "red",
-                    attrs=["bold"],
-                    force_color=True,
-                )
                 time.sleep(0.1)
-            cprint(
-                "Setting the location from the hostname ...\n",
-                "light_cyan",
-                force_color=True,
-            )
-            time.sleep(0.1)
-            location_list = hostname_dict["hostname"].split(
-                "-"
-            )  # Split the hostname to get location
-            location_dict["building"] = location_list[
-                2
-            ]  # Set building number from hostname
-            location_dict["room"] = location_list[3]  # Set room number from hostname
-            switch_type_prefix = location_list[1]
-            if (
-                switch_type_prefix.upper() in access_switch_prefix_list
-            ):  # Set switch type from the prefix
-                self.switch_type_dict["$switch_type"] = "access"
-            else:
-                self.switch_type_dict["$switch_type"] = "router"
+                location_list = hostname_dict["hostname"].split(
+                    "-"
+                )  # Split the hostname to get location
+                location_dict["building"] = location_list[
+                    2
+                ]  # Set building number from hostname
+                location_dict["room"] = location_list[3]  # Set room number from hostname
+                switch_type_prefix = location_list[1]
+                if (
+                    switch_type_prefix.upper() in access_switch_prefix_list
+                ):  # Set switch type from the prefix
+                    self.switch_type_dict["$switch_type"] = "access"
+                else:
+                    self.switch_type_dict["$switch_type"] = "router"
         self.dict_list.extend([hostname_dict, location_dict])
         for (
             dictionary
@@ -249,14 +240,7 @@ class ConfigGenerator:
         )  # Set the new config file from hostname
 
     def get_vlan_info(self):
-        """
-
-        =========
-        Variables
-        =========
-        ``:var dict vlan_dict:`` The VLAN database\n
-        :return:
-        """
+        """ """
         vlan_dict = {"vlans": {}}
 
         for line in self.old_config_list:
@@ -265,18 +249,17 @@ class ConfigGenerator:
             ):  # Get spanning-tree vlan priorities if they exist
                 self.vlan_priority = line
             elif line.startswith("vlan"):  # Get VLAN database information
+                match_index = self.old_config_list.index(line)
                 vlan_list = line.split(" ")
                 vlan_id = vlan_list[1].replace("\n", "")
-                vlan_dict["vlans"].setdefault(vlan_id, {})
-                for vlan in self.old_config_list:
-                    if vlan.startswith(" name"):
-                        vlan_name_list = vlan.split(" ")
-                        vlan_dict["vlans"][vlan_id]["name"] = vlan_name_list[-1].replace(
-                            "\n", ""
-                        )
-                    elif vlan.startswith("!"):  # Return to outer loop when we hit the '!'
-                        break
+                vlan_dict["vlans"].update({vlan_id: {}})
+                vlan_name_list = self.old_config_list[match_index + 1].split(
+                    " "
+                )  # Copy the line after for the name
+                vlan_dict["vlans"][vlan_id]["name"] = vlan_name_list[-1].replace("\n", "")
+                continue
         self.dict_list.extend([vlan_dict])
+        breakpoint()
 
     def get_interface_info(self):
         """
