@@ -1,21 +1,17 @@
 #!/usr/bin/python3.12
 __author__ = "Jonathan Conwell"
-__date__ = "1/26/2025"
-__version__ = "2.0.0"
+__date__ = "3/14/2025"
+__version__ = "1.0.0"
 __maintainer__ = "Jonathan Conwell"
 __email__ = "jconwell3115@gmail.com"
 __status__ = "Development"
 __docformat__ = "reStructuredText"
 
 import argparse
-import csv
-import fileinput
-import json
 import os
 import signal
 import sys
 import time
-import logging
 from datetime import datetime
 
 
@@ -117,7 +113,6 @@ class ConfigGenerator:
         self.parameters_dict = {}
         self.template_conditions = {}
         self.switch_type_dict = {"$switch_type": ""}
-        self.site_prefix_dict = {"S1": "site_1", "S2": "site_2", "S3": "Site_3"}
         self.site_dict = {"$site": ""}
         self.vlan_priority = ""
         self.interfaces = ""
@@ -192,13 +187,13 @@ class ConfigGenerator:
 
         """
         cprint(
-            "\nGathering basic switch information ...\n",
+            "Gathering basic switch information ...\n",
             "blue",
             attrs=["bold"],
             force_color=True,
         )
         time.sleep(0.2)
-        site_prefix_dict = {"S1": "site_1", "S2": "site_2", "S3": "Site_3"}
+        site_prefix_dict = {"S1": "site_1", "S2": "site_2", "S3": "site_3"}
 
         cprint("Getting the hostname ...\n", "light_cyan", force_color=True)
         time.sleep(0.1)
@@ -325,7 +320,7 @@ class ConfigGenerator:
 
         """
         cprint(
-            "\nGathering Router Instance Configuration and Static Routes ...\n",
+            "Gathering Router Instance Configuration and Static Routes ...\n",
             "blue",
             attrs=["bold"],
             force_color=True,
@@ -380,9 +375,6 @@ class ConfigGenerator:
                 self.dict_list.extend([gateway_dict])
         for dictionary in self.dict_list:  # Update the parameters_dict
             self.parameters_dict.update(dictionary)
-        # for key, value in self.parameters_dict.items():
-        #     print(f"{key}: {value}")
-        breakpoint()
 
     def read_templates_and_set_conditions(self):
         """This method reads the base jinja2 template into the variable ``data`` and modifies it to set the dictionary
