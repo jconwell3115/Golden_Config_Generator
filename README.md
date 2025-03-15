@@ -62,7 +62,7 @@ cd Golden_Config_Generator
 pip install -r requirements.txt
 ```
 
-**[Step 4] Install [pre-commit](https://pre-commit.com/index.html#intro):**
+**[Step 4] \(*Optional*\) Install [pre-commit](https://pre-commit.com/index.html#intro):**
 ```bash
 pre-commit install
 ```
