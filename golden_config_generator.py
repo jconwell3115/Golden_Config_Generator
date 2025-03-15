@@ -486,7 +486,7 @@ def main():
     signal.signal(signal.SIGINT, signal.SIG_DFL)  # KeyboardInterrupt: Ctrl-C
     # Create CLI arguments and descriptions
     parser = argparse.ArgumentParser(
-        prog="golden_config_generator",
+        prog="golden_config_generator.py",
         description="This program creates new 'golden' configurations using industry standard best practices from old "
         "configuration files for Cisco switches running IOS-XE versions 16.9 and up.",
         epilog="Thanks for using %(prog)s!",
