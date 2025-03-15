@@ -47,9 +47,6 @@ industry best practices and enterprise security standards in an automated fashio
 
 ## Installation
 
-This runs from the CLI using the config file names as arguments. You can use one or many names.
-> **_Future release will include the option to convert all configurations in a given directory._**
-
 **[Step 1] Clone repo:**
 ```bash
 git clone git@github.com:jconwell3115/Golden_Config_Generator.git
@@ -71,17 +68,40 @@ pre-commit install
 ```
 
 ## Usage
+```plain
+(GoldenConfigGenerator) jconw483@Jons-PC ~/Work_Environments/GoldenConfigGenerator/Golden_Config_Generator $ python3 golden_config_generator.py -h
+usage: golden_config_generator.py [-h] [-c CONFIG]
 
+This program reads in an old configuration file and then converts it to a new 'golden' 
+configuration using industry standard best practices for Cisco Catalyst switches running 
+IOS-XE versions 16.9 and up.
+
+options:
+  -h, --help            show this help message and exit
+  -c CONFIG, --config CONFIG
+                        Configuration file to convert
+
+Thanks for using golden_config_generator!
+```
+> This program can be ran with the `-c {{ switch_config }}` or with no argument. If run 
+> with no 
+> argument the program will ask for the name of the switch configuration
+> 
+>> **_Future release will include the option to convert all configurations in a given 
+> directory._**
+> 
 **Run the program on the test configurations for proof of concept:**
 
 _Sample configurations files are located in the `configuration_files/old_configurations` directory._
+
+
 ```bash
-(.venv) $ golden_config_generator.py S1-AS-3320-104-1.cfg  # Run on single configuration
-(.venv) $ golden_config_generator.py S1-AS-3320-104-1.cfg S2-AS-527-109-1.cfg # Run on multiple configurations.
+(.venv) $ golden_config_generator.py -c S1-AS-3320-104-1.cfg
 ```
 _This will output the new configurations in the `configuration_files/new_configurations` directory._
 
-_There will be a template rendered with the hostname.j2 located in the `templates/new_switch_templates` directory_
+_There will be a template rendered with the `{{ hostname }}.j2` located in the 
+`templates/new_switch_templates` directory_
 
 ---
 ## Directory Structure
@@ -89,21 +109,39 @@ _There will be a template rendered with the hostname.j2 located in the `template
 .
 ├── configuration_files
 │   ├── new_configurations
+│   │   ├── S1-AS-3320-104-1_2025_03_14.cfg
+│   │   └── S3-CS-2015-321-1_2025_03_14.cfg
 │   └── old_configurations
 │       ├── S1-AS-3320-104-1.cfg
 │       ├── S2-AS-527-109-1.cfg
 │       └── S3-CS-2015-321-1.cfg
 ├── golden_config_generator.py
 ├── LICENSE
+├── pipdeptree_current.txt
+├── pyproject.toml
 ├── README.md
 ├── requirements.txt
 └── templates
     ├── new_switch_templates
+    │   ├── S1-AS-3320-104-1.j2
+    │   └── S3-CS-2015-321-1.j2
     ├── site_1.j2
     ├── site_2.j2
     ├── site_3.j2
     └── switch_template.j2
+    
 ```
+- **configuration_files** - Directory to store old and new configurations
+  
+  - **new_configurations** - Directory that holds the new golden configs created by the 
+    program
+  -  **old_configurations** - Directory that the program searches for the 
+     configurations to be converted
+- **templates** - Directory that stores the site specific templates and the base 
+  golden config switch template
+  - **new_switch_templates** - These are the templates created during the program run, 
+    these aren't really needed, but are good reference to see the workflow.
+
 ---
 
 ## Possible Automation Enhancements
@@ -126,9 +164,7 @@ _There will be a template rendered with the hostname.j2 located in the `template
 - ~~Add base configuration template~~
 - ~~Modularize the code into smaller methods~~
 - ~~Add generic old configuration files for testing and proof of concept~~
-- Add elif for access ports to add standard config and remove duplicates
-- CLI arguments to take the file name or names if multiples are desired
-- Remove the prompt to ask for file name
+- ~~CLI arguments to take the file name~~
 - Add a CLI switch to read and convert all files in a given directory
 
 ## Author
