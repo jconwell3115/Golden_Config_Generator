@@ -107,9 +107,9 @@ class ConfigGenerator:
             "/home/jconw483/Work_Environments/GoldenConfigGenerator/"
             "Golden_Config_Generator/"
         )
-        self.template_path = os.path.join(self.project_path, r"Templates")
+        self.template_path = os.path.join(self.project_path, r"templates")
         self.old_config_list = []
-        self.switch_template = os.path.join(self.template_path, r"Switch_template.j2")
+        self.switch_template = os.path.join(self.template_path, r"switch_template.j2")
         self.new_config = os.path.join(
             self.project_path, r"configuration_files/new_configurations"
         )  # new config path
@@ -126,7 +126,6 @@ class ConfigGenerator:
         self.logging = ""
         self.rp_address = ""
         self.dict_list = []
-        self.base_config_dict_list = []
 
     def read_old_config(self, config: str) -> None:
         """
@@ -284,7 +283,6 @@ class ConfigGenerator:
                 vlan_dict["vlans"][vlan_id]["name"] = vlan_name_list[-1].replace("\n", "")
                 continue
         self.dict_list.extend([vlan_dict])
-        breakpoint()
 
     def get_interface_info(self):
         """
@@ -300,12 +298,14 @@ class ConfigGenerator:
             force_color=True,
         )
         time.sleep(0.2)
+        proxy = "no ip proxy-arp"
         standard_config = " no ip proxy-arp\n no ip redirects\n!\n"
         for line in self.old_config_list:
             if line.startswith("interface"):  # Copy the interface configurations
+                match_index = self.old_config_list.index(line)
                 interfaces = ""
                 interfaces += line  # First Line is the interface name
-                for interface in self.old_config_list:
+                for interface in self.old_config_list[match_index + 1 :]:
                     if "!" in interface:  # Stop copying lines at the !
                         interfaces += "!\n"
                         break
@@ -313,10 +313,7 @@ class ConfigGenerator:
                         interfaces += interface
 
                 # Set the standard SVI configurations if they don't exist
-                if (
-                    "interface Vlan" in interfaces
-                    and " no ip proxy-arp" not in interfaces
-                ):
+                if "interface Vlan" in interfaces and proxy not in interfaces:
                     interfaces = interfaces.replace("!\n", standard_config)
                     # TODO: Add elif for access ports to add standard config and remove duplicates
                 self.interfaces += interfaces
@@ -436,7 +433,7 @@ class ConfigGenerator:
             new_config.write(switch_config)
         source_file = os.path.join(self.template_path, self.new_config_template)
         destination_file = os.path.join(
-            self.template_path, "New_Templates", self.new_config_template
+            self.template_path, "new_switch_templates", self.new_config_template
         )
         if os.path.exists(destination_file):
             os.remove(destination_file)
