@@ -35,24 +35,37 @@ except ImportError as ie:
     print("Non-Standard Module List: ")
     for mod in mod_list:
         print(mod)
-    input(
-        "\nPress any key to exit the program."
-    )  # This keeps the window open when running the program outside the IDE
+    # This keeps the window open when running the program outside the IDE
+    input("\nPress any key to exit the program.")
     exit()
 
 
 class ConfigGenerator:
-    """
-    This class reads information from an old Cisco IOS or IOS-XE router or switch
+    """This class reads information from an old Cisco IOS or IOS-XE router or switch
     configuration and creates a new configuration based on site specific configurations
-    and Agency standard baseline configurations.
+    and industry standard baseline configurations.
 
 
     Methods
     ========
     read_old_config()
-        Reads the old configuration file and extracts unique information for use in the
-        new configuration.
+        Reads the old configuration file and creates a list object for other methods to
+        iterate over for data extraction.
+
+    get_switch_info()
+        Extracts general switch information
+
+    get_vlan_info()
+        Extracts general VLAN information
+
+    get_interface_info()
+        Extracts physical and switched virtual interface information
+
+    get_router_config()
+        Extracts router instance configurations and static routes
+
+    get_network_services_info()
+        Extracts the remaining network services configurations
 
     read_templates_and_set_conditions()
         This method reads the base jinja2 template into the variable ``data`` and modifies
@@ -70,33 +83,25 @@ class ConfigGenerator:
     :var str self.current_date: Date for use in output file naming
     :var str self.project_path: File path to the project
     :var str self.template_path: File path to the templates for the project
-    :var str self.new_config:  File path to store the new configuration file later
-    :var str self.new_config_template: Empty string, will be used to store the new config
-    template created later
-    :var dict self.parameters_dict: Dictionary that will be used to compile the
-    dictionaries generated from the information gathering
-    :var dict self.template_conditions: Dictionary for items that'll be used to set the
-    conditions in the jinja2 template prior to rendering
-    :var dict self.switch_type_dict: Dictionary to store the switch type, used for
-    conditionals in the program
-    :var str self.vlan_priority: String to store block configuration for all VLAN
-    priorities if they exist
-    :var str self.interfaces: String to store block configuration for all configured
-    interfaces
-    :var str self.router_config: String to store block configuration for all router
-    instances if they exist
-    :var str self.ip_route: String to store block configuration for all configured static
-    routes if they exist
-    :var str self.logging: String to store block configuration for all logging statements
-    :var str self.rp_address: String to store block configuration for all rp-address
-    statements if they exist
+    :var str self.switch_template: The base switch template to build the golden config
+    :var list self.old_config_list: List object to store the old configuration lines
+    :var str self.new_config:  File path will include the new configuration filename later
+    :var str self.new_config_template: Will be used for the new config template later
+    :var dict self.parameters_dict: Will be used to store the specific configration
+        dictionaries of data gathered from the old configuration
+    :var dict self.template_conditions: Items that'll be used to set the
+        conditions in the jinja2 template prior to rendering
+    :var str self.vlan_priority: Block configuration for all VLAN priorities if they exist
+    :var str self.interfaces: Block configuration for all configured interfaces
+    :var str self.router_config: Block configuration for all router instances
+    :var str self.ip_route: Block configuration for all configured static routes
+    :var str self.logging: Block configuration for all logging statements
+    :var str self.rp_address: Block configuration for all rp-address statements
     :var list self.base_config_dict_list: List of dictionaries used to render new base
-    configs from CSV rows.
+        configs from CSV rows.
     """
 
     def __init__(self):
-        """ """
-
         self.current_date = datetime.now().strftime("%Y_%m_%d")
         # Change this to the path for your project
         self.project_path = (
@@ -104,23 +109,21 @@ class ConfigGenerator:
             "Golden_Config_Generator/"
         )
         self.template_path = os.path.join(self.project_path, r"templates")
-        self.old_config_list = []
         self.switch_template = os.path.join(self.template_path, r"switch_template.j2")
+        self.old_config_list = []
         self.new_config = os.path.join(
             self.project_path, r"configuration_files/new_configurations"
-        )  # new config path
+        )
         self.new_config_template = ""
         self.parameters_dict = {}
         self.template_conditions = {}
-        self.switch_type_dict = {"$switch_type": ""}
-        self.site_dict = {"$site": ""}
         self.vlan_priority = ""
         self.interfaces = ""
         self.router_config = ""
         self.ip_route = ""
         self.logging = ""
         self.rp_address = ""
-        self.dict_list = []
+        self.base_config_dict_list = []
 
     def read_old_config(self, config: str) -> None:
         """
@@ -134,12 +137,17 @@ class ConfigGenerator:
         :exception PermissionError: If the file is open or unreadable
 
         """
+
         if config.endswith(".cfg"):
             cprint(config + " file submitted ...", "light_green", force_color=True)
         else:
             config = config + ".cfg"
 
-        print(config)
+            cprint(
+                config + " file submitted after adding .cfg ...",
+                "light_green",
+                force_color=True,
+            )
 
         old_config_file = config
         old_config_path = os.path.join(
@@ -175,9 +183,9 @@ class ConfigGenerator:
             self.read_old_config(config=config)
 
     def get_switch_info(self):
-        """
+        """This method extracts general switch information.
 
-        This method parses the old_config_var and extracts the hostname, from the hostname
+        It parses the old_config_var and extracts the hostname, from the hostname
         it gathers the site name used to set the Jinja parameters per site later.  It
         also extracts the location for the building and room. These all assume a
         certain naming convention for the network device,
@@ -193,7 +201,9 @@ class ConfigGenerator:
             force_color=True,
         )
         time.sleep(0.2)
+        site_dict = {"$site": ""}
         site_prefix_dict = {"S1": "site_1", "S2": "site_2", "S3": "site_3"}
+        switch_type_dict = {"$switch_type": ""}
 
         cprint("Getting the hostname ...\n", "light_cyan", force_color=True)
         time.sleep(0.1)
@@ -201,7 +211,7 @@ class ConfigGenerator:
         hostname_dict = {"hostname": ""}
         location_dict = {"building": "", "room": ""}
         access_switch_prefix_list = ["AS", "SE", "EN"]
-        condition_dict_list = [self.site_dict, self.switch_type_dict]
+        condition_dict_list = [site_dict, switch_type_dict]
 
         for line in self.old_config_list:
             if line.startswith("hostname"):
@@ -216,12 +226,12 @@ class ConfigGenerator:
                         "light_cyan",
                         force_color=True,
                     )
-                    self.site_dict["$site"] = site_prefix_dict[
+                    site_dict["$site"] = site_prefix_dict[
                         site_prefix.upper()
                     ]  # Use prefix as site variable
                     cprint(
                         f"This switch will be configured for the "
-                        f"{self.site_dict['$site']} site!!\n",
+                        f"{site_dict['$site']} site!!\n",
                         "red",
                         attrs=["bold"],
                         force_color=True,
@@ -241,20 +251,21 @@ class ConfigGenerator:
                 switch_type_prefix = location_list[1]
                 # Set switch type from the prefix
                 if switch_type_prefix.upper() in access_switch_prefix_list:
-                    self.switch_type_dict["$switch_type"] = "access"
+                    switch_type_dict["$switch_type"] = "access"
                 else:
-                    self.switch_type_dict["$switch_type"] = "router"
-        self.dict_list.extend([hostname_dict, location_dict])
+                    switch_type_dict["$switch_type"] = "router"
+        self.base_config_dict_list.extend([hostname_dict, location_dict])
         for dictionary in condition_dict_list:  # Update template_conditions dictionary
             self.template_conditions.update(dictionary)
         # Set the new template name from hostname
         self.new_config_template = hostname_dict["hostname"] + ".j2"
         new_config_file = hostname_dict["hostname"] + "_" + self.current_date + ".cfg"
-        # Set the new config file from hostname
+        # Set the new config filename from hostname
         self.new_config = os.path.join(self.new_config, new_config_file)
 
     def get_vlan_info(self):
-        """ """
+        """This method gathers information about the vlans configured on the device."""
+
         cprint(
             "Gathering VLAN Information ...\n",
             "blue",
@@ -277,15 +288,16 @@ class ConfigGenerator:
                 vlan_name_list = self.old_config_list[match_index + 1].split(" ")
                 vlan_dict["vlans"][vlan_id]["name"] = vlan_name_list[-1].replace("\n", "")
                 continue
-        self.dict_list.extend([vlan_dict])
+        self.base_config_dict_list.extend([vlan_dict])
 
     def get_interface_info(self):
-        """
-        This method parses the old_config_list and extracts the physical and switched virtual interface
-        configuration. This is a simple copy and paste, breaking the copying at each '!'.  Future releases will
-        convert this into a parsers that returns a dictionary, used for testing and simpler modification.
+        """This method extracts the physical and  switched virtual interface
+        configurations.
+
+        This is a simple copy and paste,  breaking the copying at each '!'.
 
         """
+
         cprint(
             "Gathering Interface Information ...\n",
             "blue",
@@ -310,15 +322,14 @@ class ConfigGenerator:
                 # Set the standard SVI configurations if they don't exist
                 if "interface Vlan" in interfaces and proxy not in interfaces:
                     interfaces = interfaces.replace("!\n", standard_config)
-                    # TODO: Add elif for access ports to add standard config and remove duplicates
                 self.interfaces += interfaces
 
     def get_router_config(self):
-        """
-        This method parses the old_config_list and extracts the router instance configurations along with any static
+        """This method extracts the router instance configurations along with any static
         routes that may be configured.
 
         """
+
         cprint(
             "Gathering Router Instance Configuration and Static Routes ...\n",
             "blue",
@@ -339,7 +350,8 @@ class ConfigGenerator:
                 self.ip_route += line
 
     def get_network_services_info(self):
-        """This method parses the old_config_list and extracts the configuration information for any network services."""
+        """This method extracts the configuration information for any network services."""
+
         cprint(
             "Gathering Network Services Information ...\n",
             "blue",
@@ -362,23 +374,24 @@ class ConfigGenerator:
                 if source_list[-1] == "\n":
                     del source_list[-1]
                 source_interface_dict["source_interface"] = source_list[-1]
-                self.dict_list.extend([source_interface_dict])
+                self.base_config_dict_list.extend([source_interface_dict])
             elif line.startswith("ip pim rp-address"):  # Copy the rp-address for pim
                 self.rp_address += line
             elif line.startswith("system mtu"):  # Copy the system MTU if it exists
                 mtu_list = line.split(" ")
                 mtu_dict["mtu"] = mtu_list[-1]
-                self.dict_list.extend([mtu_dict])
+                self.base_config_dict_list.extend([mtu_dict])
             elif line.startswith("ip default-gateway"):  # Copy the default gateway
                 default_list = line.split(" ")
                 gateway_dict["gateway"] = default_list[-1]
-                self.dict_list.extend([gateway_dict])
-        for dictionary in self.dict_list:  # Update the parameters_dict
+                self.base_config_dict_list.extend([gateway_dict])
+        for dictionary in self.base_config_dict_list:  # Update the parameters_dict
             self.parameters_dict.update(dictionary)
 
     def read_templates_and_set_conditions(self):
-        """This method reads the base jinja2 template into the variable ``data`` and modifies it to set the dictionary
-        conditions prior to the template rendering, as well as insert all the copied block configuration.
+        """This method reads the base jinja2 template into the variable ``data`` and
+        modifies it to set the dictionary conditions prior to the template rendering,
+        as well as insert all the copied block configuration.
 
         """
 
@@ -397,7 +410,9 @@ class ConfigGenerator:
             open(new_config_template, "w") as config_template,
         ):
             data = master_template.read()
-            for key in self.template_conditions:  # Set the site and switch type
+            # Set the site and switch type in the template used to call the correct
+            # site variables
+            for key in self.template_conditions:
                 data = data.replace(key, self.template_conditions[key])
             # Replace variables in the template with block config from the old config
             data = data.replace("!!!vlan_priority", self.vlan_priority)
@@ -414,6 +429,7 @@ class ConfigGenerator:
         folder outside the project templates folder.
 
         """
+
         cprint("Rendering Templates ....\n", "blue", attrs=["bold"], force_color=True)
         time.sleep(0.1)
         env = Environment(loader=FileSystemLoader(self.template_path))
@@ -447,12 +463,11 @@ class ConfigGenerator:
 
 
 def sub_main(args):
-    """
-    This function controls the flow of the program and calls the methods in the class.
+    """This function controls the flow of the program and calls the methods in the class.
 
     :param args: Parsed CLI arguments
-    :return: None
     """
+
     cfg = ConfigGenerator()
     # Check for CLI arguments, send the list as a parameter else ask for the file name
     if args.config:
@@ -482,7 +497,7 @@ def main():
 
     :return: Parsed CLI arguments if there are any
     """
-    # TODO: add CLI arguments to take the file name
+
     signal.signal(signal.SIGINT, signal.SIG_DFL)  # KeyboardInterrupt: Ctrl-C
     # Create CLI arguments and descriptions
     parser = argparse.ArgumentParser(
